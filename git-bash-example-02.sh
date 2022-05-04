@@ -1,36 +1,42 @@
 #!/bin/bash
-#########################################
-# CMIT-291 bash script example with git
-#########################################
+##################################################################################
+# CMIT-291 bash script example with git - author devarshi.pathak@faculty.umgc.edu
+##################################################################################
 # directory as the folder to look through
 #REPOSITORIES="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+##################################################################################
+
 
 REPOSITORIES=`pwd`
 TAGSTAMP=`date +%Y-%m-%d.%H%M%S`
-echo "Tagging as ${TAGSTAMP}"
 
-for REPO in `ls "$REPOSITORIES/"`
+while getopts u:e: flag
 do
-  if [ -d "$REPOSITORIES/$REPO" ]
-  then
-    echo "Updating $REPOSITORIES/$REPO at `date`"
-    if [ -d "$REPOSITORIES/$REPO/.git" ]
-    then
-      cd "$REPOSITORIES/$REPO"
-      git status
-      echo "Fetching"
-      git fetch
-      echo "Pulling"
-      git pull
-    else
-      echo "Skipping because it doesn't look like it has a .git folder."
-    fi
-    echo "Done at `date`"
-    echo
-  fi
+    case "${flag}" in
+        u) username=${OPTARG};;
+        e) email=${OPTARG};;
+    esac
 done
 
-https://github.com/devtech0101/linux-baseline.git
+if [ $# -eq 0 ]; then
+    echo "No arguments provided, please provide username and email address of your Git account"
+    echo -e "Username: $username";
+    echo -e "Email: $email";
+    exit 1
+fi
+
+git config --global user.name $username
+git config --global user.email $email
+git config --global credential.helper store
+
+echo ""
+echo "#########################################"
+echo "Today's date: as ${TAGSTAMP}"
+echo "Welcome, user: $USER, your the Git setup is completed..."
+echo "#########################################"
+git_log=$(git log)
+git_status=$(git status)
+sleep 5
 
 git clone https://github.com/devtech0101/bash-examples.git
 
@@ -43,13 +49,5 @@ for branch in $(git branch -r); do
     [[ $branch =~ origin/pr/ ]] && git merge $branch
 done
 
-echo "Checking out master branch"
-git checkout master
-git pull origin master
-
-echo "Pushing commits and tags"
-git push
-git push --tags
-
-echo "Checking out develop branch"
-git checkou
+echo "Current Git status: $git_status $git_log"
+sleep 5
